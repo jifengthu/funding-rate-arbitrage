@@ -1,4 +1,4 @@
-from hmx2.hmx_client import Client as HMX
+# from hmx2.hmx_client import Client as HMX
 from GlobalUtils.logger import logger
 import os
 

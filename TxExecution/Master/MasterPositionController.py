@@ -1,6 +1,6 @@
 from TxExecution.Binance.BinancePositionController import BinancePositionController
-from TxExecution.Synthetix.SynthetixPositionController import SynthetixPositionController
-from TxExecution.HMX.HMXPositionController import HMXPositionController
+# from TxExecution.Synthetix.SynthetixPositionController import SynthetixPositionController
+# from TxExecution.HMX.HMXPositionController import HMXPositionController
 from TxExecution.ByBit.ByBitPositionController import ByBitPositionController
 from TxExecution.OKX.OKXPositionController import OKXPositionController
 from TxExecution.GMX.GMXPositionController import GMXPositionController
@@ -15,9 +15,9 @@ from GlobalUtils.globalUtils import *
 
 class MasterPositionController:
     def __init__(self):
-        self.synthetix = SynthetixPositionController()
+        # self.synthetix = SynthetixPositionController()
         self.binance = BinancePositionController()
-        self.hmx = HMXPositionController()
+        # self.hmx = HMXPositionController()
         self.bybit = ByBitPositionController()
         # self.okx = OKXPositionController()
         self.gmx = GMXPositionController()
