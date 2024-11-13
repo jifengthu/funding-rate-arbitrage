@@ -8,6 +8,7 @@ from MatchingEngine.profitabilityChecks.GMX.GMXCheckProfitabilityUtils import *
 # from APICaller.HMX.HMXCallerUtils import *
 # from MatchingEngine.profitabilityChecks.HMX.HMXCheckProfitabilityUtils import *
 # from MatchingEngine.profitabilityChecks.Synthetix.SynthetixCheckProfitabilityUtils import *
+from MatchingEngine.profitabilityChecks.Perennial.PerennialProfitabilityChecks import *
 from APICaller.ByBit.ByBitCaller import ByBitCaller
 from gmx_python_sdk.scripts.v2.get.get_oracle_prices import OraclePrices
 from APICaller.GMX.GMXCallerUtils import ARBITRUM_CONFIG_OBJECT
@@ -95,9 +96,9 @@ class ProfitabilityChecker:
             if exchange == 'Binance':
                 estimated_profit = self.estimate_binance_profit(time_period_hours=time_period_hours, size_usd=size_usd, opportunity=opportunity)
                 return estimated_profit
-            elif exchange == 'Synthetix':
-                estimated_profit = self.estimate_synthetix_profit(time_period_hours=time_period_hours, absolute_size_usd=size_usd, opportunity=opportunity)
-                return estimated_profit
+            # elif exchange == 'Synthetix':
+            #     estimated_profit = self.estimate_synthetix_profit(time_period_hours=time_period_hours, absolute_size_usd=size_usd, opportunity=opportunity)
+            #     return estimated_profit
             elif exchange == 'GMX':
                 estimated_profit = self.estimate_GMX_profit(time_period_hours=time_period_hours, absolute_size_usd=size_usd, opportunity=opportunity, open_interest=self.gmx_open_interest)
                 return estimated_profit
@@ -111,7 +112,7 @@ class ProfitabilityChecker:
                 estimated_profit = self.estimate_okx_profit(time_period_hours=time_period_hours, size_usd=size_usd, opportunity=opportunity)
                 return estimated_profit
             elif exchange == 'Perennial':
-                estimated_profit = self.estimate_perennial_profit(time_period_hours=time_period_hours, size_usd=size_usd, opportunity=opportunity)
+                estimated_profit = self.estimate_perennial_profit(time_period_hours=time_period_hours, absolute_size_usd=size_usd, opportunity=opportunity)
                 return estimated_profit
 
             if not estimated_profit:
@@ -151,6 +152,18 @@ class ProfitabilityChecker:
                     return time_to_neutralize
                 else:
                     return time_to_neutralize
+            
+            if exchange == "Perennial":
+                time_to_neutralize = estimate_time_to_neutralize_rate_perennial(
+                    opportunity, 
+                    absolute_size_usd=size_usd, 
+                    )
+
+                if type(time_to_neutralize) == str:
+                    time_to_neutralize = self.default_trade_duration
+                    return time_to_neutralize
+                else:
+                    return time_to_neutralize
 
             elif exchange == "ByBit":
                 return "No Neutralization"
@@ -162,7 +175,7 @@ class ProfitabilityChecker:
                 return "No Neutralization"
 
         except Exception as e:
-            logger.error(f'CheckProfitability - Failed to estimate profit for exchange {exchange}, Error: {e}')
+            logger.error(f'CheckProfitability - Failed to estimate profit for exchange {exchange}, Error: {e}', exc_info=True)
             return None
 
     # def estimate_synthetix_profit(self, time_period_hours: float, absolute_size_usd: float, opportunity: dict) -> tuple:
@@ -335,11 +348,20 @@ class ProfitabilityChecker:
             symbol = opportunity['symbol']
             is_long: bool = opportunity['long_exchange'] == 'Perennial'
             initial_funding_rate_8h = opportunity['long_exchange_funding_rate_8hr'] if is_long else opportunity['short_exchange_funding_rate_8hr']
-            new_funding_rate = calculate_new_funding_velocity_perennial(
+            new_funding_velocity = calculate_new_funding_velocity_perennial(
                 symbol,
                 absolute_size_usd,
                 is_long
             )
+
+            profit = calculate_profit_perennial(
+                absolute_size_usd,
+                time_period_hours,
+                new_funding_velocity,
+                initial_funding_rate_8h
+            )
+
+            return profit
             
 
         except Exception as e:

@@ -1,7 +1,8 @@
 from GlobalUtils.logger import *
 from APICaller.Perennial.perennialCallerUtils import *
 from perennial_sdk.main.markets.market_info import MarketInfo, fetch_market_snapshot
-import json
+from concurrent.futures import ThreadPoolExecutor
+
 
 class PerennialCaller:
     def __init__(self):
@@ -11,25 +12,30 @@ class PerennialCaller:
         try:
             funding_rates = {}
             snapshots = {}
-            for symbol in symbols:
+
+            def fetch_and_store_data(symbol):
                 if symbol == 'meem':
-                    continue
+                    return None
                 snapshot = fetch_market_snapshot([symbol])
                 snapshots[symbol] = snapshot
-                symbol = symbol.lower()
-                if symbol == 'msqbtc':
-                    symbol = 'msqBTC'
-                if symbol == 'cmsqeth':
-                    symbol = 'cmsqETH'
-                client = MarketInfo(symbol)
-                funding_rate_data = client.fetch_market_funding_rate(symbol, snapshot)
-                funding_rates[symbol] = funding_rate_data
-            
+                symbol_key = symbol.lower()
+                if symbol_key == 'msqbtc':
+                    symbol_key = 'msqBTC'
+                if symbol_key == 'cmsqeth':
+                    symbol_key = 'cmsqETH'
+                client = MarketInfo(symbol_key)
+                funding_rate_data = client.fetch_market_funding_rate(symbol_key, snapshot)
+                funding_rates[symbol_key] = funding_rate_data
+
+            with ThreadPoolExecutor(max_workers=5) as executor:
+                executor.map(fetch_and_store_data, symbols)
+
             filtered_rates = self._filter_market_data(funding_rates, symbols, snapshots)
 
             return filtered_rates
+
         except Exception as e:
-            logger.error(f"PerennialAPICaller - Error fetching market data for symbol {symbol}. Error: {e}", exc_info=True)
+            logger.error(f"PerennialAPICaller - Error fetching market data for symbols. Error: {e}", exc_info=True)
             return []
 
     def _filter_market_data(self, funding_rate_data: dict, symbols: list, snapshots: dict):
@@ -42,6 +48,10 @@ class PerennialCaller:
                     index_price = MarketInfo(symbol).fetch_market_price(snapshots[symbol])
                     skew_in_asset = get_skew_in_asset_for_symbol(symbol, snapshots[symbol])
                     skew_usd = skew_in_asset * index_price
+                    if skew_usd == 0.0:
+                        continue
+                    if skew_usd == -0.0:
+                        continue
                     funding_velocity = get_funding_velocity_for_symbol(symbol, snapshots[symbol])
                     funding_rate = funding_rate_24 / 3 
                     symbol = symbol.upper()
@@ -56,12 +66,3 @@ class PerennialCaller:
                     logger.error(f"PerennialAPICaller - Error processing market data for {symbol}: {e}")
         return market_funding_rates
 
-# x = PerennialCaller()
-# symbols = get_all_symbols()
-# if 'mog' in symbols:
-#     symbols.remove('mog')
-
-# y = x.get_funding_rates(['eth'])
-# logger.info(y)
-# with open('perennialTest.json', 'w') as f:
-#     json.dump(y, f, indent=4)

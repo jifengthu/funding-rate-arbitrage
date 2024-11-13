@@ -256,3 +256,10 @@ def get_arbitrum_usdc_balance_global():
     except Exception as e:
         logger.error(f'GlobalUtils - Failed to fetch USDC balance for address {wallet_address}. Error: {e}')
         return None
+
+def get_price_coingecko(symbol):
+    url = f'https://api.coingecko.com/api/v3/simple/price'
+    params = {'ids': symbol, 'vs_currencies': 'usd'}
+    response = requests.get(url, params=params)
+    data = response.json()
+    return data.get(symbol, {}).get('usd', 'Price not found')

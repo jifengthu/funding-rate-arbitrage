@@ -6,6 +6,7 @@ from perennial_sdk.main.orders.order_manager import *
 import time
 from TxExecution.Perennial.PerennialPositionControllerUtils import *
 from APICaller.Perennial.perennialCallerUtils import *
+import requests
 
 
 class PerennialPositionController:
@@ -19,57 +20,62 @@ class PerennialPositionController:
             trade_size_with_leverage = trade_size * self.leverage
             collateral_amount = get_arbitrum_usdc_balance_global()
             if is_long:
-                long_amount = trade_size_with_leverage
+                long_amount = int(trade_size_with_leverage * 1000000)
                 short_amount = 0
             else:
                 long_amount = 0
-                short_amount = trade_size_with_leverage
+                short_amount = int(trade_size_with_leverage * 1000000)
 
-            signed_approve_tx_hash = approve_usdc_to_dsu(collateral_amount)
-            if not is_transaction_hash(signed_approve_tx_hash.hex()):
+            signed_approve_tx_hash = '0x' + approve_usdc_to_dsu(collateral_amount).hex()
+            print(f'signed_approve_tx_hash.hex() = {signed_approve_tx_hash}')
+            if not is_transaction_hash(signed_approve_tx_hash):
                 logger.error(f'PerennialPositionController - Failed to execute a trade for {symbol}; No transaction hash returned for USDC approval.')
                 return None
             
-            tx_hash_commit = commit_price_to_multi_invoker(market_address)
-            if not is_transaction_hash(tx_hash_commit.hex()):
+            signed_tx_hash_commit = '0x' + commit_price_to_multi_invoker(symbol).hex()
+            print(f'signed_tx_hash_commit.hex() = {signed_tx_hash_commit}')
+            if not is_transaction_hash(signed_tx_hash_commit):
                 logger.error(f'PerennialPositionController - Failed to execute a trade for {symbol}; No transaction hash returned from committing price to multi invoker.')
                 return None
             
-            tx_hash_place_market_order = place_market_order(
-                market_address, 
+            signed_tx_hash_place_market_order = '0x' + place_market_order(
+                symbol, 
                 long_amount, 
                 short_amount, 
                 0, 
-                collateral_amount
-            )
+                int(collateral_amount * 1000000)
+            ).hex()
+            print(f'signed_tx_hash_place_market_order.hex() = {signed_tx_hash_place_market_order}')
 
-            if not is_transaction_hash(tx_hash_place_market_order.hex()):
+            if not is_transaction_hash(signed_tx_hash_place_market_order):
                 logger.error(f'PerennialPositionController - Failed to execute a trade for {symbol}; No transaction hash returned from market order.')
                 return None
+            
+            return 'done'
 
 
-            time.sleep(10)
-            if self.was_position_opened_successfully(
-                symbol,
-                is_long
-            ):
-                logger.info(f"PerennialPositionController - Trade executed: symbol={symbol} side={'Long' if is_long else 'Short'}, Size USD={trade_size_with_leverage}")
-                try:
-                    position_object = self.get_position_object(
-                    opportunity,
-                    is_long,
-                    trade_size_with_leverage
-                    )
-                    return position_object
-                except Exception as ie:
-                    logger.error(f"PerennialPositionController - Failed to build position object, despite trade executing successfully for symbol {symbol}. Error: {ie}")
-                    return None 
-            else:
-                logger.info("PerennialPositionController - Order not filled after 10 seconds.")
-                return None
+            # time.sleep(10)
+            # if self.was_position_opened_successfully(
+            #     symbol,
+            #     is_long
+            # ):
+            #     logger.info(f"PerennialPositionController - Trade executed: symbol={symbol} side={'Long' if is_long else 'Short'}, Size USD={trade_size_with_leverage}")
+            #     try:
+            #         position_object = self.get_position_object(
+            #         opportunity,
+            #         is_long,
+            #         trade_size_with_leverage
+            #         )
+            #         return position_object
+            #     except Exception as ie:
+            #         logger.error(f"PerennialPositionController - Failed to build position object, despite trade executing successfully for symbol {symbol}. Error: {ie}")
+            #         return None 
+            # else:
+            #     logger.info("PerennialPositionController - Order not filled after 10 seconds.")
+            #     return None
 
         except Exception as e:
-            logger.error(f'PerennialPositionController - Failed to execute trade for symbol {symbol}. Error: {e}')
+            logger.error(f'PerennialPositionController - Failed to execute trade for symbol {symbol}. Error: {e}', exc_info=True)
             return None
 
     def close_position(self, symbol: str, reason: str = None):
@@ -106,7 +112,7 @@ class PerennialPositionController:
                 logger.error(f'PerennialPositionController - Position not closed after 10 second delay.')
                 return None
 
-            position_close_object = self.build_position_closed_object(symbol, reason, pnl)
+            position_close_object = self.build_position_closed_object(symbol, reason)
             self.handle_position_closed(position_close_object)
         
         except Exception as e:
@@ -130,7 +136,7 @@ class PerennialPositionController:
         try:
             open_positions = self.get_open_positions()
 
-            for key, position in open_positions.items():
+            for position in open_positions:
                 position_symbol = position['market_symbol'][0]
                 position_is_long = position['is_long']
                 
@@ -173,13 +179,15 @@ class PerennialPositionController:
     def get_open_positions(self) -> list:
         try:
             positions = get_positions_for_all_markets()
+            if not positions:
+                logger.error(f"PerennialPositionController - Failed to get open positions, None value returned from get_positions_for_all_markets")
             if len(positions) > 0:
                 return positions
             else:
                 return None
 
         except Exception as e:
-            logger.error(f"PerennialPositionController - Failed to get open positions: {e}")
+            logger.error(f"PerennialPositionController - Failed to get open positions: {e}", exc_info=True)
             return None
 
     def get_open_position_for_symbol(self, symbol: str) -> dict:
@@ -254,3 +262,18 @@ class PerennialPositionController:
         except Exception as e:
             logger.error(f"PerennialPositionController - Failed to handle position closed with details: {close_position_details}. Error: {e}", exc_info=True)
             return None
+
+op = {
+    'symbol': 'btc'
+}
+
+price = get_price_coingecko('bitcoin')
+trade_size = 50 / price
+
+x = PerennialPositionController()
+y = x.execute_trade(
+    op,
+    False,
+    trade_size
+)
+print(y)
