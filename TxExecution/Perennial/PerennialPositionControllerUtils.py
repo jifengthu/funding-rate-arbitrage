@@ -3,11 +3,12 @@ from perennial_sdk.constants import *
 from GlobalUtils.logger import logger
 
 from perennial_sdk.main.markets import *
-from APICaller.Perennial.perennialCallerUtils import get_market_address_for_symbol
+from APICaller.Perennial.perennialCallerUtils import *
 from perennial_sdk.utils.calc_funding_rate_draft_two import calculate_funding_and_interest_for_sides
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from perennial_sdk.main.graph_queries.order_fetcher import Order
+from web3 import Web3
 
 def fetch_position(market_name):
     try:
@@ -47,102 +48,68 @@ def get_positions_for_all_markets() -> list:
         logger.error(f"PerennialPositionControllerUtils - Failed to check for open positions: {e}", exc_info=True)
         return None
 
-def get_pnl_from_the_graph(symbol: str) -> float:
-    """Fetch and return the PnL for the given account and market."""
+def get_pnl_from_the_graph(symbol: str) -> str:
     try:
         account_address = str(os.getenv('ADDRESS'))
-        market_address = get_market_address_for_symbol(symbol)
-        # snapshot = fetch_market_snapshot([symbol])
-        # print_this = snapshot["result"]["postUpdate"]["marketSnapshots"][0]
-        # print(print_this)
 
         headers = {
             'Content-Type': 'application/json'
         }
 
-        query = f"""
-        {{
-        orderAccumulation(
-            first: 1, 
-            id: "ff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace",
-            where: {{ 
-                    account: "{account_address}"
-                    market: "{market_address}"
-                }}
-        ) {{
-            id
-            collateral_accumulation
-            fee_accumulation
-        }}
-        }}
-        """
-
-
-
-        response = requests.post(arbitrum_graph_url, json={'query': query}, headers=headers)
-
-        if response.status_code == 200:
-            try:
-                data = response.json()
-                print(data)
-                order = data['data']['orderAccumulation']
-
-                order_obj = {
-                    'order_id': order['id'],
-                    'account': order['account'],
-                    'market': f"{symbol} ({order['market']})",
-                    'side': "Long" if order['triggerOrderSide'] == 1 else "Short",
-                    'trigger_price': f"{int(order['triggerOrderPrice']) / 1e6:.2f}",  # Price in micro units
-                    'trigger_delta': f"{int(order['triggerOrderDelta']) / 1e6:.4f}",  # Delta in micro units
-                    'comparison': "<=" if order['triggerOrderComparison'] == -1 else ">=",
-                    'cancelled': order['cancelled'],
-                    'executed': order['executed'],
-                    'collaterals': order['associatedOrder'],
-                    'nonce': order['nonce']
+        query = """
+        query MarketAccountPositions($account: String!) {
+            marketAccounts(where: {account: $account}) {
+                market {
+                    id
                 }
-
-                return order_obj
-            
-            except requests.exceptions.JSONDecodeError as e:
-                logger.error(f"PerennialPositionControllerUtils - Failed to parse response as JSON. Error: {e}, Raw response: {response.text}", exc_info=True)
-                return None
-
-    except Exception as e:
-        logger.error(f"PerennialPositionControllerUtils - Failed to fetch PnL via graph query. Error: {e}", exc_info=True)
-        return None
-
-def get_market_accounts(symbol: str) -> str:
-    try:
-        account_address = str(os.getenv('ADDRESS'))
-        market_address = get_market_address_for_symbol(symbol)
-
-        headers = {
-            'Content-Type': 'application/json'
+                positions(orderBy: nonce, orderDirection: desc) {
+                    nonce
+                    startVersion
+                    accumulation {
+                        collateral_subAccumulation_pnl
+                        collateral_subAccumulation_funding
+                        collateral_subAccumulation_interest
+                    }
+                }
+            }
         }
-
-        query = f"""
-        {{
-        marketAccounts(
-            where: {{ 
-                    account: "{account_address}"
-                    market: "{market_address}"
-                }}
-        )
-        }}
         """
 
-        response = requests.post(arbitrum_graph_url, json={'query': query}, headers=headers)
+        variables = {
+            "account": account_address
+        }
+
+        response = requests.post(arbitrum_graph_url, json={'query': query, 'variables': variables}, headers=headers)
 
         if response.status_code == 200:
             data = response.json()
-            print(data)
-            order = data['data']['orderAccumulation']
-            print(order)
-
-    
+            formatted_data = parse_market_account_data(data, symbol)
+            return formatted_data
+ 
     except Exception as e:
         logger.error(f"PerennialPositionControllerUtils - Failed to fetch MarketAccounts via graph query. Error: {e}", exc_info=True)
         return None
 
-x = get_market_accounts('eth')
-print(x)
+def parse_market_account_data(api_response, symbol: str):
+    market_accounts = api_response.get('data', {}).get('marketAccounts', [])
+    
+    for account in market_accounts:
+        market_id = account.get('market', {}).get('id', None)
+        market = get_symbol_for_market_address(market_id)
+
+        if market == symbol and account.get('positions'):
+            highest_nonce_position = max(account['positions'], key=lambda pos: int(pos['nonce']))
+            
+            pnl = highest_nonce_position.get('accumulation', {}).get('collateral_subAccumulation_pnl', '0')
+            formatted_pnl = float(pnl) / 1000000
+            accrued_funding = highest_nonce_position.get('accumulation', {}).get('collateral_subAccumulation_funding', '0')
+            formatted_accrued_funding = float(accrued_funding) / 1000000
+
+            return {
+                "market": market,
+                "pnl": formatted_pnl,
+                "accrued_funding": formatted_accrued_funding
+            }
+    
+    # Return None if no matching market is found
+    return None

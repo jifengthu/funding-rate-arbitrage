@@ -32,7 +32,6 @@ def calculate_new_funding_velocity_perennial(symbol: str, trade_size_usd: float,
         big_6_funding_velocity_per_second = Big6Math.div(Decimal(new_skew * 1000000), Decimal(p_controller['k']))
         funding_velocity_per_second = float(big_6_funding_velocity_per_second / Decimal(1000000))
         funding_velocity_24hr = funding_velocity_per_second * (3600*24)
-        print(f'funding_velocity_24hr = {funding_velocity_24hr}')
 
         major = Big6Math.max(Decimal(long), Decimal(short))
         minor = Big6Math.min(Decimal(long), Decimal(short))

@@ -263,3 +263,21 @@ def get_price_coingecko(symbol):
     response = requests.get(url, params=params)
     data = response.json()
     return data.get(symbol, {}).get('usd', 'Price not found')
+
+SYMBOL_COINGECKO_MAP = {
+    'ETH': 'ethereum',
+    'BTC': 'bitcoin',
+    'SOL': 'solana',
+    'MATIC': 'matic-network',
+    'TIA': 'celestia',
+    "RLB": "rollbit-coin",
+    "LINK": "chainlink",
+    "BNB": "binancecoin",
+    "XRP": "ripple",
+    "ARB": "arbitrum",
+    "JUP": "jupiter-exchange-solana",
+    "MKR": "maker",
+    "DOGE":"dogecoin",
+    "AERO":  "aerodrome-finance",
+    "POPCAT":  "popcat"
+}
