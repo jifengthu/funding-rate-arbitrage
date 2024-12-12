@@ -11,6 +11,7 @@ from TxExecution.Perennial.PerennialPositionControllerUtils import get_positions
 class PerennialPositionMonitor():
     def __init__(self, db_path='trades.db'):
         self.db_path = db_path
+        self.client = GLOBAL_PERENNIAL_CLIENT
         try:
             self.conn = sqlite3.connect(self.db_path)
         except Exception as e:
@@ -54,15 +55,15 @@ class PerennialPositionMonitor():
 
     def get_funding_rate(self, position) -> float:
         try:
-            symbol = position['symbol']
-            market = self.client.perps.get_market_summary(market_name=symbol)
-            
-            if 'current_funding_rate' in market:
-                funding_rate = float(market['current_funding_rate'])
-                return funding_rate
+            symbol: str = position['symbol']
+            is_long: bool = position['is_long']
+            rate_dict = self.client.market_info.fetch_market_funding_rate(symbol)
+            if is_long:
+                rate = float(rate_dict['net_rate_long_1hr'])
             else:
-                logger.error(f"PerennialPositionMonitor - Funding rate not found in market summary for symbol {symbol}.")
-                return None 
+                rate = float(rate_dict['net_rate_short_1hr'])
+
+            return rate * 8
             
         except Exception as e:
             logger.error(f"PerennialPositionMonitor - Error fetching funding rate for symbol {symbol}: {e}")

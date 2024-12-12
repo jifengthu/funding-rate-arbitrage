@@ -1,22 +1,20 @@
 from GlobalUtils.globalUtils import *
 from GlobalUtils.logger import *
 from perennial_sdk.config import *
-from perennial_sdk.main.graph_queries.order_fetcher import fetch_latest_order_nonce
 from perennial_sdk.main.orders.order_manager import *
 import time
 from TxExecution.Perennial.PerennialPositionControllerUtils import *
 from APICaller.Perennial.perennialCallerUtils import *
-import requests
 
 
 class PerennialPositionController:
     def __init__(self):
         self.leverage = int(os.getenv('TRADE_LEVERAGE'))
+        self.client = GLOBAL_PERENNIAL_CLIENT
 
     def execute_trade(self, opportunity: dict, is_long: bool, trade_size: float):
         try:
-            symbol = str(opportunity['symbol'])
-            market_address = get_market_address_for_symbol(symbol)
+            symbol = str(opportunity['symbol']).lower()
             trade_size_with_leverage = trade_size * self.leverage
             price = get_price_coingecko(SYMBOL_COINGECKO_MAP[symbol.upper()])
             trade_size_asset = trade_size_with_leverage / price
@@ -28,10 +26,8 @@ class PerennialPositionController:
                 long_amount = 0
                 short_amount = trade_size_asset
             
-            symbol = symbol.lower()
             
-            signed_tx_hash_commit = '0x' + commit_price_to_multi_invoker(symbol.lower()).hex()
-            logger.info(f'signed_tx_hash_commit.hex() = {signed_tx_hash_commit}')
+            signed_tx_hash_commit = self.client.tx_executor.commit_price_to_multi_invoker(symbol.lower())
             if not is_transaction_hash(signed_tx_hash_commit):
                 logger.error(f'PerennialPositionController - Failed to execute a trade for {symbol}; No transaction hash returned from committing price to multi invoker.')
                 return None
@@ -40,14 +36,13 @@ class PerennialPositionController:
             logger.info(f'short_amount = {short_amount}')
             logger.info(f'collateral_amount = {collateral_amount}')
 
-            signed_tx_hash_place_market_order = '0x' + place_market_order(
+            signed_tx_hash_place_market_order = '0x' + self.client.tx_executor.place_market_order(
                 symbol, 
                 long_amount, 
                 short_amount, 
                 0, 
                 int(collateral_amount)
-            ).hex()
-            logger.info(f'signed_tx_hash_place_market_order.hex() = {signed_tx_hash_place_market_order}')
+            )
 
             if not is_transaction_hash(signed_tx_hash_place_market_order):
                 logger.error(f'PerennialPositionController - Failed to execute a trade for {symbol}; No transaction hash returned from market order.')
@@ -85,25 +80,25 @@ class PerennialPositionController:
             else:
                 is_long = False
 
-            tx_hash_commit = commit_price_to_multi_invoker(symbol)
-            if not is_transaction_hash(tx_hash_commit.hex()):
+            tx_hash_commit = self.client.tx_executor.commit_price_to_multi_invoker(symbol)
+            if not is_transaction_hash(tx_hash_commit):
                 logger.error(f'PerennialPositionController - Failed to commit price to multi invoker for {symbol}; No transaction hash returned from market order.')
                 return None
-            logger.info(f"PerennialPositionController - Commit price transaction Hash: 0x{tx_hash_commit.hex()}")
+            logger.info(f"PerennialPositionController - Commit price transaction Hash: 0x{tx_hash_commit}")
 
-            tx_hash_update = close_position_in_market(symbol)
-            if not is_transaction_hash(tx_hash_update.hex()):
+            tx_hash_update = self.client.tx_executor.close_position_in_market(symbol)
+            if not is_transaction_hash(tx_hash_update):
                 logger.error(f'PerennialPositionController - Failed to close position for {symbol}; No transaction hash returned from market order.')
                 return None
-            logger.info(f"PerennialPositionController - Close position transaction Hash: {tx_hash_update.hex()}")
+            logger.info(f"PerennialPositionController - Close position transaction Hash: {tx_hash_update}")
 
             time.sleep(10)
 
-            tx_hash_withdraw = withdraw_collateral(symbol)
-            if not is_transaction_hash(tx_hash_update.hex()):
+            tx_hash_withdraw = self.client.tx_executor.withdraw_collateral(symbol)
+            if not is_transaction_hash(tx_hash_update):
                 logger.error(f'PerennialPositionController - Failed to close position for {symbol}; No transaction hash returned from market order.')
                 return None
-            logger.info(f"PerennialPositionController - Withdraw collateral transaction Hash: {tx_hash_withdraw.hex()}")
+            logger.info(f"PerennialPositionController - Withdraw collateral transaction Hash: {tx_hash_withdraw}")
 
 
             time.sleep(10)
@@ -232,8 +227,7 @@ class PerennialPositionController:
         try:
             symbol = opportunity['symbol']
             side = 'Long' if is_long else 'Short'
-            market_address = get_market_address_for_symbol(symbol)
-            liquidation_price = AccountInfo(market_address).get_liquidation_price_for_position(symbol)
+            liquidation_price = self.client.account_info.get_liquidation_price_for_position(symbol)
 
             return {
                 'exchange': 'Perennial',

@@ -2,6 +2,9 @@ from perennial_sdk.constants.market_addresses import arbitrum_markets
 from GlobalUtils.logger import logger
 from decimal import Decimal
 from perennial_sdk.utils.calc_funding_rate_draft_two import *
+from perennial_sdk.sdk import PerennialSDK
+
+GLOBAL_PERENNIAL_CLIENT = PerennialSDK()
 
 def get_market_address_for_symbol(symbol: str) -> str:
     try:
