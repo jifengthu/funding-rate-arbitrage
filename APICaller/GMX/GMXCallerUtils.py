@@ -25,8 +25,6 @@ from gmx_python_sdk.scripts.v2.get.get_open_interest import OpenInterest
 from gmx_python_sdk.scripts.v2.get.get_oracle_prices import OraclePrices
 from gmx_python_sdk.scripts.v2.get.get_pool_tvl import GetPoolTVL
 
-from gmx_python_sdk.scripts.v2.gmx_utils import ConfigManager
-
 from dotenv import load_dotenv
 load_dotenv()
 PATH_TO_GMX_CONFIG_FILE = os.getenv('PATH_TO_GMX_CONFIG_FILE')

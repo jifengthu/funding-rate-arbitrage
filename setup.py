@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
-requirements.append('hmx-v2-python @ git+https://github.com/50shadesofgwei/v2-sdk-python.git@main')
+# requirements.append('hmx-v2-python @ git+https://github.com/50shadesofgwei/v2-sdk-python.git@main')
 requirements.append('gmx_python_sdk @ git+https://github.com/50shadesofgwei/gmx_python_sdk_custom.git@main')
 
 setup(

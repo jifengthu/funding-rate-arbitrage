@@ -22,8 +22,8 @@ class Main:
         self.position_controller.subscribe_to_events()
         self.position_monitor = MasterPositionMonitor()
         self.trade_logger = TradeLogger()
-        SynthetixMarketDirectory.initialize()
-        GMXMarketDirectory.initialize()
+        # SynthetixMarketDirectory.initialize()
+        # GMXMarketDirectory.initialize()
     
     def search_for_opportunities(self):
         try:

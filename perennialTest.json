@@ -1,0 +1,9 @@
+[
+    {
+        "exchange": "Perennial",
+        "symbol": "ETH",
+        "funding_rate": 0.0004080000000000001,
+        "funding_velocity": -0.005088586956521739,
+        "skew_usd": -5424.163426775288
+    }
+]

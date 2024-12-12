@@ -1,0 +1,246 @@
+[
+    {
+        "exchange": "ByBit",
+        "symbol": "BTCUSDT",
+        "funding_rate": 0.0001,
+        "skew_usd": 5777853113.575261
+    },
+    {
+        "exchange": "ByBit",
+        "symbol": "ETHUSDT",
+        "funding_rate": 0.00021872,
+        "skew_usd": 2660648617.2856
+    },
+    {
+        "exchange": "ByBit",
+        "symbol": "SOLUSDT",
+        "funding_rate": 0.0001,
+        "skew_usd": 1100662226.52
+    },
+    {
+        "exchange": "ByBit",
+        "symbol": "ARBUSDT",
+        "funding_rate": 0.0001,
+        "skew_usd": 51587123.51784
+    },
+    {
+        "exchange": "ByBit",
+        "symbol": "BNBUSDT",
+        "funding_rate": 0.0001,
+        "skew_usd": 81565508.90120001
+    },
+    {
+        "exchange": "ByBit",
+        "symbol": "DOGEUSDT",
+        "funding_rate": 0.0001,
+        "skew_usd": 457646048.56824
+    },
+    {
+        "exchange": "ByBit",
+        "symbol": "AVAXUSDT",
+        "funding_rate": 0.0001,
+        "skew_usd": 80383646.75
+    },
+    {
+        "exchange": "ByBit",
+        "symbol": "NEARUSDT",
+        "funding_rate": 0.0001,
+        "skew_usd": 67410722.6694
+    },
+    {
+        "exchange": "ByBit",
+        "symbol": "AAVEUSDT",
+        "funding_rate": 0.0001,
+        "skew_usd": 51649716.801800005
+    },
+    {
+        "exchange": "ByBit",
+        "symbol": "ATOMUSDT",
+        "funding_rate": 0.0001,
+        "skew_usd": 28194827.9833
+    },
+    {
+        "exchange": "ByBit",
+        "symbol": "LINKUSDT",
+        "funding_rate": 0.0001,
+        "skew_usd": 83917760.1128
+    },
+    {
+        "exchange": "ByBit",
+        "symbol": "UNIUSDT",
+        "funding_rate": 0.0001,
+        "skew_usd": 35922186.423599996
+    },
+    {
+        "exchange": "ByBit",
+        "symbol": "LTCUSDT",
+        "funding_rate": 0.0001,
+        "skew_usd": 75367249.462
+    },
+    {
+        "exchange": "ByBit",
+        "symbol": "OPUSDT",
+        "funding_rate": 0.0001,
+        "skew_usd": 38842113.621879995
+    },
+    {
+        "exchange": "ByBit",
+        "symbol": "GMXUSDT",
+        "funding_rate": 0.0001,
+        "skew_usd": 4652524.773899999
+    },
+    {
+        "exchange": "Perennial",
+        "symbol": "ETH",
+        "funding_rate": 0.0004080000000000001,
+        "funding_velocity": -0.005088586956521739,
+        "skew_usd": -5455.843075950987
+    },
+    {
+        "exchange": "Perennial",
+        "symbol": "BTC",
+        "funding_rate": 8e-05,
+        "funding_velocity": 0.13240078125,
+        "skew_usd": 147251.37078483298
+    },
+    {
+        "exchange": "Perennial",
+        "symbol": "SOL",
+        "funding_rate": 0.000208,
+        "funding_velocity": 0.0015678571428571428,
+        "skew_usd": 1374.2554344177
+    },
+    {
+        "exchange": "Perennial",
+        "symbol": "MATIC",
+        "funding_rate": 0.0016239999999999998,
+        "funding_velocity": 0.0,
+        "skew_usd": -0.0
+    },
+    {
+        "exchange": "Perennial",
+        "symbol": "TIA",
+        "funding_rate": -0.0005920000000000001,
+        "funding_velocity": 0.0,
+        "skew_usd": -0.0
+    },
+    {
+        "exchange": "Perennial",
+        "symbol": "RLB",
+        "funding_rate": -0.00012,
+        "funding_velocity": 0.0,
+        "skew_usd": -0.0
+    },
+    {
+        "exchange": "Perennial",
+        "symbol": "LINK",
+        "funding_rate": 0.00108,
+        "funding_velocity": 0.0416625,
+        "skew_usd": 3550.312136523597
+    },
+    {
+        "exchange": "Perennial",
+        "symbol": "BNB",
+        "funding_rate": 2.3999999999999997e-05,
+        "funding_velocity": 0.0,
+        "skew_usd": -0.0
+    },
+    {
+        "exchange": "Perennial",
+        "symbol": "XRP",
+        "funding_rate": 9.599999999999999e-05,
+        "funding_velocity": 0.0038250000000000003,
+        "skew_usd": 343.1238889702803
+    },
+    {
+        "exchange": "Perennial",
+        "symbol": "ARB",
+        "funding_rate": -6.4e-05,
+        "funding_velocity": 0.0,
+        "skew_usd": -0.0
+    },
+    {
+        "exchange": "Perennial",
+        "symbol": "MSQBTC",
+        "funding_rate": 0.0005600000000000001,
+        "funding_velocity": 0.0,
+        "skew_usd": -0.0
+    },
+    {
+        "exchange": "Perennial",
+        "symbol": "CMSQETH",
+        "funding_rate": 0.000448,
+        "funding_velocity": -0.001185,
+        "skew_usd": -96.348185068
+    },
+    {
+        "exchange": "Perennial",
+        "symbol": "JUP",
+        "funding_rate": 0.000136,
+        "funding_velocity": 0.0,
+        "skew_usd": -0.0
+    },
+    {
+        "exchange": "Perennial",
+        "symbol": "XAU",
+        "funding_rate": 0.00016,
+        "funding_velocity": 0.0005556184615384615,
+        "skew_usd": 10180.6706486
+    },
+    {
+        "exchange": "Perennial",
+        "symbol": "JPY",
+        "funding_rate": 2.3999999999999997e-05,
+        "funding_velocity": 0.0,
+        "skew_usd": -0.0
+    },
+    {
+        "exchange": "Perennial",
+        "symbol": "MKR",
+        "funding_rate": 6.4e-05,
+        "funding_velocity": 0.0,
+        "skew_usd": -0.0
+    },
+    {
+        "exchange": "Perennial",
+        "symbol": "POL",
+        "funding_rate": 0.0016239999999999998,
+        "funding_velocity": 0.0,
+        "skew_usd": -0.0
+    },
+    {
+        "exchange": "Perennial",
+        "symbol": "DOGE",
+        "funding_rate": 0.000224,
+        "funding_velocity": 0.0,
+        "skew_usd": -0.0
+    },
+    {
+        "exchange": "Perennial",
+        "symbol": "EUR",
+        "funding_rate": 0.0,
+        "funding_velocity": 0.0,
+        "skew_usd": -0.0
+    },
+    {
+        "exchange": "Perennial",
+        "symbol": "GBP",
+        "funding_rate": 0.0,
+        "funding_velocity": 0.0,
+        "skew_usd": -0.0
+    },
+    {
+        "exchange": "Perennial",
+        "symbol": "AERO",
+        "funding_rate": -0.00052,
+        "funding_velocity": -0.025750000000000002,
+        "skew_usd": -75.8868889164
+    },
+    {
+        "exchange": "Perennial",
+        "symbol": "POPCAT",
+        "funding_rate": 0.00043200000000000004,
+        "funding_velocity": 0.0,
+        "skew_usd": -0.0
+    }
+]

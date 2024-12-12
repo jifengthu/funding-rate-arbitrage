@@ -25,9 +25,11 @@ class ByBitPositionController:
 
     def execute_trade(self, opportunity, is_long: bool, trade_size: float):
         try:
-            symbol = opportunity['symbol']
+            symbol = str(opportunity['symbol'])
             side = get_side(is_long)
-            trade_size_in_asset = get_asset_amount_for_given_dollar_amount(symbol, trade_size)
+            # trade_size_in_asset = get_asset_amount_for_given_dollar_amount(symbol, trade_size)
+            price = get_price_coingecko(SYMBOL_COINGECKO_MAP[symbol.upper()])
+            trade_size_in_asset = trade_size / price
             trade_size_with_leverage = trade_size_in_asset * self.leverage
             full_symbol = symbol+'USDT'
             qty_step_raw = self.get_qty_step(full_symbol)
@@ -211,12 +213,14 @@ class ByBitPositionController:
 
     def get_position_object(self, opportunity: dict, response: dict, is_long: bool, truncated_value: str) -> dict:
         try:
-            symbol = opportunity['symbol']
+            symbol = str(opportunity['symbol'])
             result = response['result']
             order_id = result.get('orderId', None)
             side = 'Long' if is_long else 'Short'
             size = float(truncated_value)
-            size_usd = get_dollar_amount_for_given_asset_amount(symbol, size)
+            price = get_price_coingecko(SYMBOL_COINGECKO_MAP[symbol.upper()])
+            size_usd = size * price
+            # size_usd = get_dollar_amount_for_given_asset_amount(symbol, size)
             liquidation_price = self.get_liquidation_price(symbol)
 
             return {
