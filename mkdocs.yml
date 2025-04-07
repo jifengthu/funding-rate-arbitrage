@@ -1,0 +1,65 @@
+site_name: Equilibria Docs
+site_description: Open Source Arbitrage Searcher
+repo_url: "https://github.com/50shadesofgwei/funding-rate-arbitrage"
+
+nav:
+  - Home:
+    - index.md
+  - Quickstart: 
+    - Getting Started: getting-started.md
+    - CLI: usage.md 
+    - v1-client: quickstart/v1-client.md
+  - Architecture: architecture.md
+  - Backtesting: backtesting.md
+  - Concepts: concepts.md
+  - API Reference: api.md 
+  - Contributing: CONTRIBUTING.md
+  - Roadmap: roadmap.md
+  - Legal Disclaimer: Disclaimer.md
+  - Safety: SAFETY.md
+
+theme:
+  name: material
+  # logo: logo.svg 
+  # favicon: favicon.svg
+  palette:
+    - media: "(prefers-color-scheme)"
+      accent: lime
+      primary: black
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      accent: lime
+      primary: black
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      accent: lime
+      primary: black
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+  features:
+    - content.code.copy
+
+plugins:
+- search
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+
+
